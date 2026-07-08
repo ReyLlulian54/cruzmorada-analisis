@@ -90,6 +90,11 @@ def parse_args():
         help="Tamaño de bloque para la lectura paralela de Dask (default: 64MB)",
     )
     parser.add_argument(
+        "--sep",
+        default=";",
+        help="Separador de campos del CSV (default: ';', confirmado con debug_lines.py)",
+    )
+    parser.add_argument(
         "--sample-benchmark",
         action="store_true",
         help="Corre un benchmark serial (Pandas) vs paralelo (Dask) antes de procesar",
@@ -103,17 +108,23 @@ def parse_args():
     return parser.parse_args()
 
 
-def benchmark_serial_vs_parallel(input_path: str, nrows: int) -> dict:
+def benchmark_serial_vs_parallel(input_path: str, nrows: int, sep: str) -> dict:
     """Compara lectura serial (Pandas, single-core) vs paralela (Dask, multi-core)."""
     print(f"\n--- Benchmark serial vs paralelo (muestra de {nrows:,} filas) ---")
 
     t0 = time.time()
-    df_pd = pd.read_csv(input_path, nrows=nrows, dtype=COLUMN_DTYPES, encoding="utf-8")
+    df_pd = pd.read_csv(
+        input_path, nrows=nrows, dtype=COLUMN_DTYPES, encoding="utf-8",
+        sep=sep, quotechar='"',
+    )
     t_serial = time.time() - t0
     print(f"Pandas (serial, 1 core):   {t_serial:.2f}s  -> {len(df_pd):,} filas")
 
     t0 = time.time()
-    ddf = dd.read_csv(input_path, dtype=COLUMN_DTYPES, blocksize="16MB", encoding="utf-8")
+    ddf = dd.read_csv(
+        input_path, dtype=COLUMN_DTYPES, blocksize="16MB", encoding="utf-8",
+        sep=sep, quotechar='"',
+    )
     df_dask = ddf.head(nrows, npartitions=-1, compute=True)
     t_parallel = time.time() - t0
     print(
@@ -136,7 +147,7 @@ def main():
         raise FileNotFoundError(f"No se encontró el archivo de entrada: {input_path}")
 
     if args.sample_benchmark:
-        benchmark_serial_vs_parallel(str(input_path), args.benchmark_rows)
+        benchmark_serial_vs_parallel(str(input_path), args.benchmark_rows, args.sep)
 
     print(f"[INFO] Cargando '{input_path}' con Dask (blocksize={args.blocksize})...")
     t0 = time.time()
@@ -146,6 +157,8 @@ def main():
         dtype=COLUMN_DTYPES,
         blocksize=args.blocksize,
         encoding="utf-8",
+        sep=args.sep,
+        quotechar='"',
     )
     ddf = ddf.rename(columns=RENAME_MAP)
     print(f"[INFO] Particiones de lectura (por bloque): {ddf.npartitions}")

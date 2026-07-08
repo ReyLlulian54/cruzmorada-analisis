@@ -4,4 +4,5 @@ __pycache__/
 .env
 data/*.csv
 data/lake/
+data/lake_clean/
 .ipynb_checkpoints/
