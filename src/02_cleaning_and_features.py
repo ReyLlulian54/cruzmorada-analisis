@@ -15,11 +15,23 @@ minutos sin terminar; materializando a Pandas esto toma segundos.
 Reglas de limpieza aplicadas (ver diagnóstico previo):
   1. PCT_DESCUENTO fuera de [0,1] (imposible) -> se elimina la fila.
   2. EDAD implícita fuera de [0,100] años -> NaN, imputada con mediana.
+     Cálculo con /365.25 (no //365) para no sesgar por años bisiestos.
   3. Duplicados boleta+sku+cliente+fecha -> se conservan (no son
      duplicados reales, son unidades individuales con descuentos
      distintos dentro de la misma boleta).
   4. UNIDADES constante = 1 -> se reconstruye la cantidad real
      comprada por producto/transacción agrupando por (boleta, sku).
+  5. frecuencia_compra_cliente: usa nunique(boleta), NO count(boleta).
+     Corrección de auditoría: count() contaba líneas de producto (una
+     boleta con 10 productos sumaba 10), no visitas/transacciones
+     reales del cliente.
+
+Nota sobre estandarización (monto_aplicado_z, edad_z): estas columnas
+se calculan con media/std GLOBALES, válido para EDA (Días 1-2). El
+modelo de regresión del Día 3 NO las usa directamente como features;
+cualquier estandarización para el modelo se recalcula después del
+train/test split, usando solo estadísticos del set de entrenamiento,
+para evitar fuga de datos.
 
 Uso:
     python src/02_cleaning_and_features.py --lake data/lake --output data/lake_clean
@@ -68,9 +80,21 @@ def main():
     print(f"[INFO] Filas iniciales: {n_inicial:,}")
 
     ddf = ddf[(ddf["pct_descuento"] >= 0) & (ddf["pct_descuento"] <= 1)]
-    ddf["fecha"] = dd.to_datetime(ddf["fecha"])
-    ddf["fecha_nacimiento"] = dd.to_datetime(ddf["fecha_nacimiento"], errors="coerce")
-    ddf["edad"] = (ddf["fecha"] - ddf["fecha_nacimiento"]).dt.days // 365
+    ddf["fecha"] = dd.to_datetime(ddf["fecha"], format="%Y-%m-%dT%H:%M:%S")
+
+    # Pre-validar el año de nacimiento COMO TEXTO antes de convertir a
+    # datetime: algunos años están corruptos (ej. "9771", "7968", "0960")
+    # y quedan fuera del rango representable por datetime64[ns]
+    # (~1677-2262), lo que provocaba un OverflowError al calcular.
+    # Se descartan a nivel de string antes de intentar construir la
+    # fecha, para nunca llegar a generar el valor imposible.
+    anio_str = ddf["fecha_nacimiento"].str.slice(0, 4)
+    anio_valido = anio_str.astype("float64").between(1900, 2024)
+    ddf["fecha_nacimiento"] = ddf["fecha_nacimiento"].mask(~anio_valido)
+    ddf["fecha_nacimiento"] = dd.to_datetime(
+        ddf["fecha_nacimiento"], format="%Y-%m-%d", errors="coerce"
+    )
+    ddf["edad"] = (ddf["fecha"] - ddf["fecha_nacimiento"]).dt.days // 365.25
 
     # -------------------------------------------------------------
     # Materializar a Pandas: el resto de las operaciones (groupby +
@@ -89,14 +113,20 @@ def main():
     print(f"[INFO] Filas materializadas: {n_tras_descuento:,}")
 
     # --- Regla 2: EDAD implícita fuera de rango -> NaN, imputar con mediana ---
+    # Incluye tanto las edades calculadas fuera de [0,100] como las filas
+    # cuya fecha_nacimiento ya quedó en NaN por año inválido/no parseable
+    # (ambos casos se imputan con la misma mediana).
+    n_anio_invalido = int(df["edad"].isna().sum())
     edad_invalida = (df["edad"] < EDAD_MIN_VALIDA) | (df["edad"] > EDAD_MAX_VALIDA)
-    n_edad_invalida = int(edad_invalida.sum())
+    n_edad_fuera_rango = int(edad_invalida.sum())
     df.loc[edad_invalida, "edad"] = np.nan
     mediana_edad = float(df["edad"].median())
     df["edad"] = df["edad"].fillna(mediana_edad)
     print(
-        f"[LIMPIEZA] EDAD implícita fuera de [{EDAD_MIN_VALIDA},{EDAD_MAX_VALIDA}] años: "
-        f"{n_edad_invalida:,} filas -> imputadas con mediana ({mediana_edad:.0f} años)"
+        f"[LIMPIEZA] EDAD: {n_edad_fuera_rango:,} filas fuera de "
+        f"[{EDAD_MIN_VALIDA},{EDAD_MAX_VALIDA}] años + {n_anio_invalido:,} filas con año de "
+        f"nacimiento no parseable -> total {n_edad_fuera_rango + n_anio_invalido:,} "
+        f"imputadas con mediana ({mediana_edad:.0f} años)"
     )
 
     # --- Variables derivadas ---
@@ -107,7 +137,7 @@ def main():
         "hallazgo en el informe."
     )
 
-    df["frecuencia_compra_cliente"] = df.groupby("codigo_cliente")["boleta"].transform("count")
+    df["frecuencia_compra_cliente"] = df.groupby("codigo_cliente")["boleta"].transform("nunique")
     df["unidades_producto_boleta"] = df.groupby(["boleta", "sku"])["unidades"].transform("count")
 
     # --- Estandarización (z-score) ---
