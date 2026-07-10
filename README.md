@@ -9,6 +9,10 @@ pip install -r requirements.txt
 ```
 
 Colocar el archivo `ventas_completas.csv` dentro de `data/` (no se sube a git, revisar `.gitignore`).
+Crear un archivo `.env` en la raíz del proyecto para definir la semilla de reproducibilidad:
+```env
+CPYD_SEED=42
+```
 
 ## Arquitectura
 
