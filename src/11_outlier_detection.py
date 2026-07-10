@@ -22,6 +22,7 @@ Uso:
     python src/11_outlier_detection.py --lake data/lake_clean
 """
 import argparse
+import os
 
 import duckdb
 import pandas as pd

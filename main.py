@@ -19,6 +19,9 @@ import subprocess
 import sys
 import time
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Forzar UTF-8 en la consola de Windows para caracteres especiales
 if sys.platform == "win32":

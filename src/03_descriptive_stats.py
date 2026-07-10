@@ -8,6 +8,7 @@ Uso:
     python src/03_descriptive_stats.py --lake data/lake_clean
 """
 import argparse
+import os
 import duckdb
 
 VARIABLES_NUMERICAS = [
@@ -23,6 +24,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--lake", default="data/lake_clean", help="Data lake limpio (Parquet)")
     args = parser.parse_args()
+
+    if not os.path.exists(args.lake):
+        raise FileNotFoundError(f"El data lake especificado no existe: {args.lake}")
 
     glob_path = f"{args.lake}/**/*.parquet"
     con = duckdb.connect()

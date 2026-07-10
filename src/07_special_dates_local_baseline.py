@@ -13,6 +13,7 @@ Uso:
     python src/07_special_dates_local_baseline.py --serie reports/figures/serie_diaria_confiable.csv
 """
 import argparse
+import os
 import pandas as pd
 
 FECHAS_ESPECIALES = {

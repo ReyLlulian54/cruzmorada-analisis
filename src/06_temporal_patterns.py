@@ -19,6 +19,7 @@ Uso:
     python src/06_temporal_patterns.py --lake data/lake_clean --fecha-inicio 2024-04-07
 """
 import argparse
+import os
 from pathlib import Path
 
 import duckdb
