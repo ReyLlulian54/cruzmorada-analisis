@@ -1,5 +1,4 @@
 """
-03_descriptive_stats.py
 
 Estadística descriptiva completa sobre el dataset limpio (data/lake_clean),
 usando DuckDB (funciones de agregación estadística nativas: skewness,

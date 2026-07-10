@@ -1,9 +1,8 @@
 """
-02_cleaning_and_features.py
 
 Limpieza de datos y creación de variables derivadas.
 
-Arquitectura híbrida (decisión justificada): la lectura y la escritura
+Arquitectura híbrida: la lectura y la escritura
 final se hacen con Dask (paralelo, particionado), pero las operaciones
 de groupby + join (que requieren shuffle entre particiones) se hacen
 materializando a Pandas, ya que el dataset (634MB, 3.24M filas) cabe
@@ -22,13 +21,13 @@ Reglas de limpieza aplicadas (ver diagnóstico previo):
   4. UNIDADES constante = 1 -> se reconstruye la cantidad real
      comprada por producto/transacción agrupando por (boleta, sku).
   5. frecuencia_compra_cliente: usa nunique(boleta), NO count(boleta).
-     Corrección de auditoría: count() contaba líneas de producto (una
+     count() contaba líneas de producto (una
      boleta con 10 productos sumaba 10), no visitas/transacciones
      reales del cliente.
 
 Nota sobre estandarización (monto_aplicado_z, edad_z): estas columnas
-se calculan con media/std GLOBALES, válido para EDA (Días 1-2). El
-modelo de regresión del Día 3 NO las usa directamente como features;
+se calculan con media/std GLOBALES, válido para EDA. El
+modelo de regresión no las usa directamente como features;
 cualquier estandarización para el modelo se recalcula después del
 train/test split, usando solo estadísticos del set de entrenamiento,
 para evitar fuga de datos.

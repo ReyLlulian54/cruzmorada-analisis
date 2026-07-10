@@ -1,15 +1,13 @@
 """
-09_own_hypotheses.py
-
-Día 3, Bloque 2: 3 hipótesis propias.
+3 hipótesis propias.
 
   H1: el monto promedio de compra (monto_aplicado) difiere según el
       género del cliente (GENERO 1 vs 2). Test: Mann-Whitney U
-      (monto_aplicado no es normal, Bloque 2 del Día 2).
+      (monto_aplicado no es normal).
 
   H2: existe asociación entre la edad del cliente y su frecuencia de
       compra (visitas). Test: Spearman, calculado a NIVEL DE CLIENTE
-      (una fila por codigo_cliente), no a nivel de transacción — si se
+      (una fila por codigo_cliente), no a nivel de transacción, si se
       calculara sobre todas las filas, un cliente con 97 compras
       pesaría 97 veces más que uno con 1 sola compra, sesgando la
       correlación hacia los clientes más frecuentes (pseudo-replicación).

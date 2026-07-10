@@ -1,18 +1,16 @@
 """
-08_hypothesis_testing.py
-
-Día 3, Bloque 1: hipótesis del enunciado.
+Hipótesis del enunciado.
 
   Ejemplo 1: ¿el ticket promedio (monto_aplicado) es distinto entre
-  APP y WEB? monto_aplicado no es normal (Bloque 2 del Día 2), así que
+  APP y WEB? monto_aplicado no es normal, así que
   el test principal es Mann-Whitney U (no paramétrico). Se reporta
   también t-test de Welch como comparación.
 
   Ejemplo 2: ¿el descuento (pct_descuento) afecta la cantidad comprada
   (unidades_producto_boleta)? Se usa correlación de Spearman con test
   de hipótesis formal (H0: rho=0) más una regresión simple. La
-  correlación del Bloque 3 del Día 2 ya había dado r≈0.0002, p=0.74,
-  así que se espera no encontrar efecto — se confirma formalmente acá.
+  correlación ya había dado r≈0.0002, p=0.74,
+  así que se espera no encontrar efecto, se confirma formalmente acá.
 
 Uso:
     python src/08_hypothesis_testing.py --lake data/lake_clean

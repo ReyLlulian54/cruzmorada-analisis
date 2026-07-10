@@ -1,5 +1,4 @@
 """
-debug_lines.py
 
 Inspecciona el CSV crudo como texto plano (sin pandas) para diagnosticar
 problemas de parseo: comas sin escapar dentro de campos de texto,

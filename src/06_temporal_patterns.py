@@ -1,11 +1,10 @@
 """
-06_temporal_patterns.py
 
-Bloque 4 del Día 2: patrones temporales.
+Patrones temporales.
 
-HALLAZGO IMPORTANTE: la serie diaria completa tiene 0 transacciones
+La serie diaria completa tiene 0 transacciones
 entre 2023-11-10 y 2024-04-06 (149 días, solo 8 transacciones el
-primer día) — artefacto de generación del dataset sintético, no un
+primer día), artefacto de generación del dataset sintético, no un
 cierre real de la farmacia. Luego hay un crecimiento muy pronunciado
 hasta fines de 2024. Por eso el análisis de series de tiempo se
 restringe al período con actividad consistente (>= 2024-04-07); de lo

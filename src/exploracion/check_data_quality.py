@@ -1,5 +1,4 @@
 """
-check_data_quality.py
 
 Chequeo profundo de calidad de datos sobre el data lake (data/lake/),
 más allá de nulos explícitos: busca valores "centinela" (missing

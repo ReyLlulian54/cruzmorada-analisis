@@ -6,7 +6,6 @@
 python -m venv venv
 source venv/bin/activate   # En Windows: venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env
 ```
 
 Colocar el archivo `ventas_completas.csv` dentro de `data/` (no se sube a git, revisar `.gitignore`).
@@ -22,13 +21,25 @@ Colocar el archivo `ventas_completas.csv` dentro de `data/` (no se sube a git, r
 
 ## Pipeline (orden de ejecución)
 
-1. `src/01_load_and_partition.py` — Carga paralela del CSV + partición a Parquet por LOCAL.
-   ```bash
-   python src/01_load_and_partition.py --input data/ventas_completas.csv --output data/lake --sample-benchmark
-   ```
-2. `src/02_cleaning_missing_outliers.py` — Valores faltantes, outliers, variables derivadas. *(pendiente)*
-3. `src/03_eda.py` — Estadística descriptiva, visualizaciones, tests de asociación. *(pendiente)*
-4. `src/04_inference_modeling.py` — Hipótesis, regresión, validación train/test. *(pendiente)*
+El proyecto cuenta con un orquestador principal (`main.py`) que ejecuta secuencialmente todos los scripts del pipeline y genera un resumen ordenado en consola:
+
+```bash
+python main.py
+```
+
+También es posible ejecutar scripts de manera individual. Los scripts que componen el flujo de trabajo son:
+
+1. `src/01_load_and_partition.py` — Carga paralela del CSV y partición a Parquet por LOCAL (incluye validación de paralelismo con Dask).
+2. `src/02_cleaning_and_features.py` — Limpieza de datos (fechas, variables numéricas) y creación de features derivadas.
+3. `src/03_descriptive_stats.py` — Estadística descriptiva automatizada usando DuckDB.
+4. `src/04_histograms_normality.py` — Generación de histogramas, boxplots y tests formales de normalidad.
+5. `src/05_association_analysis.py` — Análisis de asociación de variables (Correlación de Spearman, Chi-cuadrado, Kruskal-Wallis).
+6. `src/06_temporal_patterns.py` — Patrones temporales y descomposición STL (tendencia, estacionalidad, residual).
+7. `src/07_special_dates_local_baseline.py` — Comparación de métricas en fechas especiales frente a su baseline histórica.
+8. `src/08_hypothesis_testing.py` — Pruebas de hipótesis especificadas en el requerimiento (t-tests, ANOVA).
+9. `src/09_own_hypotheses.py` — Comprobación de hipótesis propias (efectos de género, edad y canal de venta).
+10. `src/10_regression_model.py` — Modelo de regresión lineal (Ridge) y análisis de residuales.
+11. `src/11_outlier_detection.py` — Diagnóstico adicional de outliers mediante rango intercuartil (IQR) y Z-score.
 
 ## Notas
 

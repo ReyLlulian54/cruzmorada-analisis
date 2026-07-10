@@ -1,10 +1,8 @@
 """
-05_association_analysis.py
-
-Bloque 3 del Día 2: análisis de asociación entre variables.
+Análisis de asociación entre variables.
 
   - Matriz de correlación de Spearman con p-values (no Pearson, ya
-    que ninguna variable pasó los tests de normalidad del Bloque 2).
+    que ninguna variable pasó los tests de normalidad).
   - Chi-cuadrado CANAL vs LOCAL. Se corre la versión completa (792
     locales) y se reporta el % de celdas con frecuencia esperada < 5
     (diagnóstico de violación de supuestos por la alta cardinalidad

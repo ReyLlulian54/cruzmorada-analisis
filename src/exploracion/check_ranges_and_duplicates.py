@@ -1,5 +1,4 @@
 """
-check_ranges_and_duplicates.py
 
 Último chequeo antes de escribir el script de limpieza:
 - Rangos de UNIDADES y MONTO_APLICADO

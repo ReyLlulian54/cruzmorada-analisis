@@ -1,7 +1,6 @@
 """
-07_special_dates_local_baseline.py
 
-Refinamiento de la comparación de fechas especiales del Bloque 4.
+Refinamiento de la comparación de fechas especiales.
 
 Comparar una fecha especial contra el promedio de TODO el período
 confunde dos efectos: el día de la semana (ej. el día de la madre cae

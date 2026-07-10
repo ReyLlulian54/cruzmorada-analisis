@@ -1,14 +1,11 @@
 """
-04_histograms_normality.py
 
-Bloque 2 del Día 2: histogramas + curva de densidad + tests de
-normalidad (Shapiro-Wilk y Lilliefors) para las variables numéricas
+Histogramas + curva de densidad + tests de normalidad (Shapiro-Wilk y Lilliefors) para las variables numéricas
 clave, y boxplots por categoría (CANAL y top 10 LOCAL por volumen).
 
 Se usa Lilliefors en vez del KS estándar: como la media y desviación
 se estiman de la misma muestra que se testea, el KS clásico da
-p-valores inválidos (demasiado conservadores). Lilliefors corrige esto
-(corrección de auditoría).
+p-valores inválidos (demasiado conservadores). Lilliefors corrige esto.
 
 Los tests de normalidad se corren sobre una muestra aleatoria fija
 (semilla CPYD_SEED) en vez de las 3.24M filas completas: con un N tan
@@ -81,7 +78,7 @@ def main():
         # Lilliefors, no KS estándar: los parámetros (media, std) se
         # estiman de la MISMA muestra que se testea, lo cual invalida
         # las tablas críticas del KS clásico y da p-valores demasiado
-        # conservadores. Lilliefors corrige esto (corrección de auditoría).
+        # conservadores. Lilliefors corrige esto.
         lilliefors_stat, lilliefors_p = lilliefors(datos, dist="norm")
         resultados.append(
             {

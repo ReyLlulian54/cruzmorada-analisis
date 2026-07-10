@@ -1,13 +1,12 @@
 """
-check_canal_local_determinism.py
 
 Verifica si LOCAL predice CANAL de forma casi determinística (hipótesis
-surgida del chi-cuadrado del Bloque 3, donde chi2 dio exactamente = N).
+surgida del chi-cuadrado, donde chi2 dio exactamente = N).
 
 Para cada LOCAL, calcula qué % de sus transacciones caen en su canal
 más frecuente. Si la mayoría de los locales están cerca del 100%,
 confirma que LOCAL y CANAL están altamente asociados (relevante para
-evitar multicolinealidad en el modelo de regresión del Día 3).
+evitar multicolinealidad en el modelo de regresión).
 
 Uso:
     python src/check_canal_local_determinism.py --lake data/lake_clean

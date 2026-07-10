@@ -1,5 +1,4 @@
 """
-01_load_and_partition.py
 
 Carga el CSV de ventas de Cruz Morada (ventas_completas.csv) usando Dask
 (lectura por bloques/paralela), y lo particiona en un "data lake" de
