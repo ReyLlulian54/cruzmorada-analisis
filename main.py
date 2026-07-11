@@ -36,7 +36,7 @@ if sys.platform == "win32":
 # ─────────────────────────────────────────────────────────────
 PIPELINE = [
     (1,  "src/01_load_and_partition.py",          "Carga CSV y partición a Data Lake (Parquet)",
-         ["--input", "data/ventas_completas.csv"]),
+         ["--input", None]),  # Se rellena en main() con la ruta proporcionada por el usuario
     (2,  "src/02_cleaning_and_features.py",       "Limpieza de datos y features derivados",
          []),
     (3,  "src/03_descriptive_stats.py",           "Estadística descriptiva (DuckDB)",
@@ -86,6 +86,50 @@ def banner():
     seed = os.environ.get("CPYD_SEED", "42")
     print(f"  {DIM}Semilla de reproducibilidad (CPYD_SEED): {seed}{RESET}")
     print()
+
+
+def ask_csv_path():
+    """Solicita al usuario la ruta del archivo CSV de ventas."""
+    print(f"  {YELLOW}{BOLD}Archivo de datos requerido{RESET}")
+    print(f"  {DIM}Ingrese la ruta completa al archivo CSV de ventas{RESET}")
+    print(f"  {DIM}(ejemplo: C:\\Users\\usuario\\ventas_completas.csv){RESET}")
+    print()
+    while True:
+        try:
+            ruta = input(f"  {CYAN}▶ Ruta del CSV:{RESET} ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print(f"\n  {RED}Operación cancelada.{RESET}")
+            sys.exit(1)
+
+        # Quitar comillas envolventes si el usuario las copió
+        if (ruta.startswith('"') and ruta.endswith('"')) or \
+           (ruta.startswith("'") and ruta.endswith("'")):
+            ruta = ruta[1:-1]
+
+        if not ruta:
+            print(f"  {RED}  ✗ No ingresó ninguna ruta. Intente de nuevo.{RESET}")
+            continue
+
+        ruta_path = os.path.abspath(ruta)
+
+        if not os.path.isfile(ruta_path):
+            print(f"  {RED}  ✗ Archivo no encontrado: {ruta_path}{RESET}")
+            print(f"  {DIM}    Verifique la ruta e intente de nuevo.{RESET}")
+            continue
+
+        if not ruta_path.lower().endswith(".csv"):
+            print(f"  {YELLOW}  ⚠ El archivo no tiene extensión .csv: {ruta_path}{RESET}")
+            try:
+                confirmar = input(f"  {CYAN}  ¿Continuar de todas formas? (s/N):{RESET} ").strip().lower()
+            except (EOFError, KeyboardInterrupt):
+                print(f"\n  {RED}Operación cancelada.{RESET}")
+                sys.exit(1)
+            if confirmar not in ("s", "si", "sí", "y", "yes"):
+                continue
+
+        print(f"  {GREEN}  ✓ Archivo seleccionado: {ruta_path}{RESET}")
+        print()
+        return ruta_path
 
 
 def section_header(num, total, description):
@@ -216,6 +260,17 @@ def parse_args():
 def main():
     args = parse_args()
     banner()
+
+    # Solicitar ruta del CSV al usuario
+    csv_path = ask_csv_path()
+
+    # Inyectar la ruta en los argumentos del primer script del pipeline
+    for i, (num, script, desc, extra_args) in enumerate(PIPELINE):
+        if "--input" in extra_args:
+            idx = extra_args.index("--input")
+            extra_args[idx + 1] = csv_path
+            PIPELINE[i] = (num, script, desc, extra_args)
+            break
 
     # Filtrar scripts según argumentos
     if args.solo is not None:
